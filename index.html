@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitwandel Email Planner V12b</title>
+    <title>Fitwandel Email Planner V2.0</title>
     <style>
         body { font-family: sans-serif; line-height: 1.5; max-width: 900px; margin: 10px auto; padding: 15px; background-color: #f0f4f8; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
@@ -42,7 +42,13 @@
             </div>
             <div class="day-box">
                 <h3 id="date-wed">Woensdag</h3>
-                <label>Trainer:</label>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+                    <label style="margin-top:0;">Trainer:</label>
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:normal; margin-top:0;">
+                        <input type="checkbox" id="wed-ochtend" onchange="onWedOchtendChange()" style="width:auto; margin:0;">
+                        Ochtend
+                    </label>
+                </div>
                 <select id="trainer-wed" onchange="generateContent()"></select>
                 <label>Locatie:</label>
                 <select id="loc-wed" onchange="generateContent()"></select>
@@ -94,12 +100,20 @@
         sel.innerHTML = options;
     }
 
+    function onWedOchtendChange() {
+        if (document.getElementById('wed-ochtend').checked) {
+            document.getElementById('trainer-wed').value = "Ankie";
+        }
+        generateContent();
+    }
+
     function generateContent() {
         var sender = document.getElementById('sender-name').value;
         var tMon = document.getElementById('trainer-mon').value;
         var lMon = document.getElementById('loc-mon').value;
         var tWed = document.getElementById('trainer-wed').value;
         var lWed = document.getElementById('loc-wed').value;
+        var wedOchtend = document.getElementById('wed-ochtend').checked;
         var tSat1 = document.getElementById('trainer-sat-1').value;
         var tSat2 = document.getElementById('trainer-sat-2').value;
         var lSat = document.getElementById('loc-sat').value;
@@ -124,13 +138,13 @@
         
         var days = [
             {d: dMon, t: tMon, l: lMon, time: "19.00 uur"},
-            {d: dWed, t: tWed, l: lWed, time: "19.00 uur"},
+            {d: dWed, t: tWed, l: lWed, time: (wedOchtend ? "09.15 uur" : "19.00 uur"), subjDay: (wedOchtend ? "woensdagochtend" : null)},
             {d: dSat, t: zaterdagTrainer, l: lSat, time: "09.00 uur"}
         ];
 
         for(var j=0; j<days.length; j++) {
             var item = days[j];
-            var daySimple = item.d.toLocaleDateString('nl-NL', {weekday:'long'});
+            var daySimple = item.subjDay || item.d.toLocaleDateString('nl-NL', {weekday:'long'});
             var dateSimple = item.d.toLocaleDateString('nl-NL', {day:'numeric', month:'long'}).replace(/ /g, "_");
             var mailLink = "mailto:" + targetEmail + "?subject=" + daySimple + "_" + dateSimple;
             
@@ -187,7 +201,7 @@
     }
 
     // Directe start voor iPad
-    fillSelect("sender-name", TRAINERS, "Marja");
+    fillSelect("sender-name", TRAINERS, "Clemens");
     fillSelect("trainer-mon", TRAINERS, "Marja");
     fillSelect("loc-mon", LOCATIES, "CKC");
     fillSelect("trainer-wed", TRAINERS, "Clemens");
